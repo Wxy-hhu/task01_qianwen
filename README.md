@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FastAPI AI聊天应用演示项目
 
 一个基于FastAPI和多AI提供商的智能聊天应用，支持连续多轮对话、流式响应、图片理解等功能。
@@ -271,3 +272,7 @@ AI_ROLES = {
 ---
 
 如果你觉得这个项目有用，请给它一个⭐️！
+=======
+# task01_qianwen
+fastapi,python,qianwen
+>>>>>>> 2e2332de2fb85802988066fc9e83a55cb7c4bb07
