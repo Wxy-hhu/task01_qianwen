@@ -148,11 +148,6 @@ fastapi-ai-chat-demo/
 - 支持在对话中动态切换模型
 - 每个提供商支持多个模型选择
 
-### 角色切换
-- 智能助手：通用AI助手
-- AI老师：教学和解释专家
-- 编程专家：编程和技术问题专家
-
 ### 图片理解
 1. 点击图片上传按钮
 2. 选择图片文件（支持jpg、png等格式）
@@ -242,19 +237,6 @@ AI_ROLES = {
 - 修改 `static/index.html` 自定义前端界面
 - 添加新的API端点扩展功能
 - 修改配置文件支持更多选项
-
-## 📚 相关文档
-
-项目包含详细的开发文档：
-- [FastAPI开发AI应用一：实现连续多轮对话](docs/FastAPI开发AI应用一：实现连续多轮对话.md)
-- [FastAPI开发AI应用二：多模型厂商使用](docs/FastAPI开发AI应用二：多模型厂商使用.md)
-- [FastAPI开发AI应用三：添加深度思考功能](docs/FastAPI开发AI应用三：添加深度思考功能.md)
-- [FastAPI开发AI应用四：新增豆包、kimi模型](docs/FastAPI开发AI应用四：新增豆包、kimi模型.md)
-- [FastAPI开发AI应用五：模型新增视觉理解](docs/FastAPI开发AI应用五：模型新增视觉理解.md)
-
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request来改进这个项目！
 
 ## 📄 许可证
 

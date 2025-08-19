@@ -17,13 +17,19 @@ from io import BytesIO
 from PIL import Image
 
 from fastapi import FastAPI, HTTPException, Query, File, UploadFile, Form
-from fastapi.responses import StreamingResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware  # 导入CORS中间件
+from fastapi.responses import StreamingResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import redis
 
 from config import Config
 from ai_providers.factory import AIProviderFactory, MultiProviderManager
+
+# 1. 先配置API路由（如聊天接口、图片上传接口）
+# 注意：API路由需放在通配符路由之前，避免被拦截
+from fastapi import APIRouter
+api_router = APIRouter(prefix="/api")  # API路径统一前缀为 /api
 
 # 配置日志系统
 # 创建配置实例
@@ -57,7 +63,31 @@ app = FastAPI(
 )
 
 # 挂载静态文件目录
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# 注册API路由
+app.include_router(api_router)
+
+# 2. 挂载Vue静态资源（以方案1为例，挂载到根路径）
+VUE_DIST_DIR = os.path.join(os.path.dirname(__file__), "vite_chatbot/dist")
+app.mount("/", StaticFiles(directory=VUE_DIST_DIR, html=False), name="vue-static")
+
+
+# 定义允许跨域的源（前端域名/端口）
+origins = [
+    "http://localhost:8080",  # 前端本地开发地址（必配）
+    "http://127.0.0.1:8080",  # 本地IP地址（避免localhost解析问题）
+]
+
+#  全局添加CORS中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # 允许的跨域源列表
+    allow_credentials=True,  # 允许携带Cookie（如用户认证信息）
+    allow_methods=["*"],     # 允许的HTTP方法（*表示所有：GET/POST/PUT/DELETE等）
+    allow_headers=["*"],     # 允许的HTTP请求头（*表示所有：如Content-Type、Authorization等）
+)
+
 
 # Redis连接配置
 try:
@@ -371,8 +401,10 @@ async def generate_streaming_response(user_id: str, session_id: str, user_messag
 @app.get("/")
 async def root():
     """根路径重定向到聊天界面"""
-    logger.info("访问根路径，重定向到聊天界面")
-    return RedirectResponse(url="/static/index.html")
+    # logger.info("访问根路径，重定向到聊天界面")
+    # return RedirectResponse(url="/static/index.html")
+    index_path = os.path.join(VUE_DIST_DIR, "index.html")
+    return FileResponse(index_path)
 
 @app.get("/api")
 async def api_info():
@@ -542,6 +574,19 @@ async def get_providers():
     except Exception as e:
         logger.error(f"获取AI提供商列表失败: {e}")
         raise HTTPException(status_code=500, detail=f"获取提供商列表失败: {str(e)}")
+    
+    # 4. 通配符路由：所有非API、非静态资源的路径，都返回index.html（解决SPA刷新404）
+# 注意：该路由需放在最后，避免拦截API和静态资源请求
+@app.get("/{full_path:path}")
+async def catch_all(full_path: str):
+    # 排除API路径（避免/api/*请求被拦截）
+    if full_path.startswith("api/"):
+        return {"detail": "Not Found"}, 404
+    
+    # 返回Vue的index.html，由前端路由处理
+    index_path = os.path.join(VUE_DIST_DIR, "index.html")
+    return FileResponse(index_path)
+
 
 @app.delete("/chat/session/{session_id}")
 async def delete_session(
@@ -684,6 +729,8 @@ async def upload_image(file: UploadFile = File(...)):
                 "base64_data": base64_data
             }
         }
+    
+    
 
     except HTTPException:
         raise
