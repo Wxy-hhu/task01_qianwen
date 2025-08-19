@@ -24,3 +24,4 @@ if __name__ == "__main__":
         ],
         log_level="info" if not config.DEBUG else "debug"
     )
+

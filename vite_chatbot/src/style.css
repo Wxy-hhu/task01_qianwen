@@ -428,7 +428,7 @@ body {
 }
 
 .session-list {
-  max-height: 300px;
+  max-height: 700px;
   overflow-y: auto;
   margin-top: 10px;
 }

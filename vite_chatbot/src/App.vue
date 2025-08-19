@@ -35,22 +35,7 @@
         </div>
       </div>
 
-      <div class="assistant-section">
-        <div class="section-title">模型选择</div>
-        <div class="assistant-list">
-          <!-- 助手列表将通过Vue动态加载 -->
-          <div 
-            v-for="model in models" 
-            :key="model.id"
-            class="assistant-item"
-            :class="{ 'selected': selectedModelId === model.id }"
-            @click="selectModel(model.id)"
-          >
-            <div class="assistant-icon">{{ model.icon }}</div>
-            <span>{{ model.name }}</span>
-          </div>
-        </div>
-      </div>
+
     </div>
 
     <!-- 右侧对话区域 -->
@@ -82,16 +67,14 @@
         </div>
       </div>
 
+
       <div class="chat-messages" id="chatMessages">
-                <div class="message assistant">
+        <div class="message assistant">
                     <div class="message-avatar">🤖</div>
                     <div class="message-content-wrapper">
                         👋 欢迎使用FastAPI AI聊天演示！请从左侧选择一个AI模型开始对话。
                     </div>
-                </div>
-      </div>
-
-      <div class="chat-messages" id="chatMessages">
+        </div>
         <div 
           v-for="(message, index) in messages" 
           :key="index" 
@@ -129,7 +112,7 @@
                   v-for="model in models" 
                   :key="model.id"
                   class="dropdown-item"
-                  @click="selectModel(model.id)"
+                  @click.stop="selectModel(model.id)"
                 >
                   <div class="dropdown-item-icon">{{ model.icon }}</div>
                   <span>{{ model.name }}</span>
@@ -442,16 +425,67 @@ export default {
       this.userId = userId;
     },
     
-    // 从后端获取模型列表
+   
+
     async fetchModels() {
       try {
-        const response = await axios.get('/roles');
-        this.models = response.data.roles.map(role => ({
-          id: role.key,
-          name: role.name,
-          icon: role.icon || '🤖',
-          provider: role.provider || 'default'
-        }));
+        // const response = await axios.get('http://localhost:8000/providers'); // 修改为调用 /providers 接口
+        // const providers = response.data.providers;
+        
+        // // 从提供商数据中提取模型信息
+        // this.models = [];
+        // providers.forEach(provider => {
+        //   provider.models.forEach(model => {
+        //     this.models.push({
+        //       id: model.id || model.name, // 使用模型ID或名称作为唯一标识
+        //       name: model.name || model.id,
+        //       icon: provider.icon || '🤖',
+        //       provider: provider.id,
+        //       is_default: provider.is_default || false
+        //     });
+        //   });
+        // });
+        
+        const response = await axios.get('http://localhost:8000/providers');
+        const providers = response.data.providers;
+
+        // 从提供商数据中提取模型信息
+        this.models = [];
+        providers.forEach(provider => {
+          // 检查provider.models是字符串数组还是对象数组
+          if (provider.models && Array.isArray(provider.models)) {
+            provider.models.forEach(model => {
+              // 如果model是字符串（模型名称）
+              if (typeof model === 'string') {
+                this.models.push({
+                  id: model, // 使用模型名称作为ID
+                  name: model,
+                  icon: provider.icon || '🤖',
+                  provider: provider.id,
+                  is_default: provider.is_default || false
+                });
+              } 
+              // 如果model是对象
+              else if (typeof model === 'object') {
+                this.models.push({
+                  id: model.id || model.name,
+                  name: model.name || model.id,
+                  icon: provider.icon || '🤖',
+                  provider: provider.id,
+                  is_default: provider.is_default || false
+                });
+              }
+            });
+          }
+        });
+        // 如果没有获取到模型，使用默认的后备数据
+        if (this.models.length === 0) {
+          this.models = [
+            { id: 'gpt-3.5', name: 'Deepseek-chat', icon: '🤖', provider: 'openai' },
+            { id: 'gpt-4', name: 'Deepseek-reasoner', icon: '🧠', provider: 'openai' },
+            { id: 'claude', name: 'Qianwen-VL', icon: '✨', provider: 'anthropic' },
+          ];
+        }
         
         // 设置默认选中的模型
         if (this.models.length > 0) {
@@ -461,17 +495,20 @@ export default {
         console.error('获取模型列表失败:', error);
         // 设置默认模型作为后备
         this.models = [
-          { id: 'gpt-3.5', name: 'Deepseek-chat', icon: '🤖' },
-          { id: 'gpt-4', name: 'Deepseek-reasoner', icon: '🧠' },
-          { id: 'claude', name: 'Qianwen-VL', icon: '✨' },
+          { id: 'gpt-3.5', name: 'Deepseek-chat', icon: '🤖', provider: 'openai' },
+          { id: 'gpt-4', name: 'Deepseek-reasoner', icon: '🧠', provider: 'openai' },
+          { id: 'claude', name: 'Qianwen-VL', icon: '✨', provider: 'anthropic' },
         ];
+        if (this.models.length > 0) {
+          this.selectedModelId = this.models[0].id;
+        }
       }
     },
     
     // 获取用户的所有会话
     async fetchSessions() {
       try {
-        const response = await axios.get('/chat/sessions', {
+        const response = await axios.get('http://localhost:8000/chat/sessions', {
           params: { user_id: this.userId }
         });
         this.sessions = response.data.sessions;
@@ -506,7 +543,7 @@ export default {
         const formData = new FormData();
         formData.append('file', file);
         
-        const response = await axios.post('/upload/image', formData, {
+        const response = await axios.post('http://localhost:8000/upload/image', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -539,14 +576,114 @@ export default {
       }
     },
     
-    // 发送消息
+    // // 发送消息
+    // async sendMessage() {
+    //   if (!this.canSendMessage) return;
+      
+    //   // 如果是新会话，先创建会话
+    //   if (!this.currentSessionId) {
+    //     try {
+    //       const response = await axios.post('http://localhost:8000/chat/start', null, {
+    //         params: { user_id: this.userId }
+    //       });
+    //       this.currentSessionId = response.data.session_id;
+    //       // 添加欢迎消息
+    //       this.messages = [{
+    //         isAssistant: true,
+    //         avatar: this.selectedModel?.icon || '🤖',
+    //         content: response.data.welcome_message
+    //       }];
+    //     } catch (error) {
+    //       console.error('创建会话失败:', error);
+    //       return;
+    //     }
+    //   }
+      
+    //   // 添加用户消息
+    //   const userMessage = {
+    //     isAssistant: false,
+    //     avatar: '👤',
+    //     content: this.newMessage.trim(),
+    //     timestamp: Date.now()
+    //   };
+      
+    //   // 如果有图片，添加图片URL
+    //   if (this.previewImageUrl) {
+    //     userMessage.imageUrl = this.previewImageUrl;
+    //     userMessage.imageAlt = '用户上传的图片';
+    //   }
+      
+    //   this.messages.push(userMessage);
+      
+    //   // 清空输入
+    //   this.newMessage = '';
+    //   const imageInput = document.getElementById('imageUpload');
+    //   if (imageInput) imageInput.value = '';
+      
+    //   // 添加加载指示器
+    //   const loadingMessage = {
+    //     isAssistant: true,
+    //     avatar: this.selectedModel?.icon || '🤖',
+    //     content: '正在思考...',
+    //     isLoading: true
+    //   };
+    //   this.messages.push(loadingMessage);
+    //   this.scrollToBottom();
+      
+    //   // 准备请求数据
+    //   const requestData = {
+    //     user_id: this.userId,
+    //     session_id: this.currentSessionId,
+    //     message: userMessage.content,
+    //     role: this.selectedModelId,
+    //     provider: this.selectedModel?.provider || 'default'
+    //   };
+      
+    //   // 如果有图片
+    //   if (this.imageFile) {
+    //     requestData.image_data = this.previewImageUrl.split(',')[1];
+    //     requestData.image_type = this.previewImageUrl.split(';')[0].split(':')[1];
+    //   }
+      
+    //   // 发送消息到后端
+    //   try {
+    //     const response = await axios.fetch('http://localhost:8000/chat/stream', requestData);
+        
+    //     // 移除加载消息
+    //     this.messages = this.messages.filter(msg => !msg.isLoading);
+        
+    //     // 添加AI回复
+    //     const aiResponse = {
+    //       isAssistant: true,
+    //       avatar: this.selectedModel?.icon || '🤖',
+    //       content: response.data, // 假设返回的是完整文本
+    //       timestamp: Date.now()
+    //     };
+        
+    //     this.messages.push(aiResponse);
+    //     this.fetchSessions(); // 刷新会话列表
+    //   } catch (error) {
+    //     console.error('发送消息失败:', error);
+    //     // 移除加载消息并显示错误
+    //     this.messages = this.messages.filter(msg => !msg.isLoading);
+    //     this.messages.push({
+    //       isAssistant: true,
+    //       avatar: this.selectedModel?.icon || '🤖',
+    //       content: '抱歉，出错了: ' + error.message
+    //     });
+    //   } finally {
+    //     this.previewImageUrl = null;
+    //     this.imageFile = null;
+    //     this.scrollToBottom();
+    //   }
+    // },
     async sendMessage() {
       if (!this.canSendMessage) return;
       
-      // 如果是新会话，先创建会话
+      // 如果是新会话，先创建会话 
       if (!this.currentSessionId) {
         try {
-          const response = await axios.post('/chat/start', null, {
+          const response = await axios.post('http://localhost:8000/chat/start', null, {
             params: { user_id: this.userId }
           });
           this.currentSessionId = response.data.session_id;
@@ -580,15 +717,15 @@ export default {
       
       // 清空输入
       this.newMessage = '';
-      const imageInput = document.getElementById('imageUpload');
-      if (imageInput) imageInput.value = '';
+
       
       // 添加加载指示器
       const loadingMessage = {
         isAssistant: true,
         avatar: this.selectedModel?.icon || '🤖',
-        content: '正在思考...',
-        isLoading: true
+        content: '',
+        isLoading: true,
+        messageId: Date.now() // 为消息添加唯一标识
       };
       this.messages.push(loadingMessage);
       this.scrollToBottom();
@@ -608,31 +745,77 @@ export default {
         requestData.image_type = this.previewImageUrl.split(';')[0].split(':')[1];
       }
       
-      // 发送消息到后端
+      // 清空图片输入
+      this.removeImage()
+      
+      // 发送消息到后端 - 使用流式处理
       try {
-        const response = await axios.post('/chat/stream', requestData);
+        const response = await fetch('http://localhost:8000/chat/stream', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
         
-        // 移除加载消息
-        this.messages = this.messages.filter(msg => !msg.isLoading);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
-        // 添加AI回复
-        const aiResponse = {
-          isAssistant: true,
-          avatar: this.selectedModel?.icon || '🤖',
-          content: response.data, // 假设返回的是完整文本
-          timestamp: Date.now()
-        };
+        // 获取可读流
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let aiResponseContent = '';
+        let loadingMessageIndex = this.messages.findIndex(msg => msg.isLoading);
         
-        this.messages.push(aiResponse);
+        // 处理流式数据
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          // 解码并处理数据
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.substring(6)); // 移除 "data: " 前缀
+                if (data.content) {
+                  aiResponseContent += data.content;
+                  
+                  // 更新加载消息的内容
+                  if (loadingMessageIndex !== -1) {
+                    this.messages[loadingMessageIndex].content = aiResponseContent;
+                    this.scrollToBottom();
+                  }
+                }
+              } catch (e) {
+                console.error('解析流数据失败:', e, line);
+              }
+            }
+          }
+        }
+        
+        // 流结束后，移除加载状态
+        if (loadingMessageIndex !== -1) {
+          this.messages[loadingMessageIndex].isLoading = false;
+          this.messages[loadingMessageIndex].timestamp = Date.now();
+        }
+        
         this.fetchSessions(); // 刷新会话列表
       } catch (error) {
         console.error('发送消息失败:', error);
         // 移除加载消息并显示错误
-        this.messages = this.messages.filter(msg => !msg.isLoading);
+        const loadingMessageIndex = this.messages.findIndex(msg => msg.isLoading);
+        if (loadingMessageIndex !== -1) {
+          this.messages.splice(loadingMessageIndex, 1);
+        }
         this.messages.push({
           isAssistant: true,
           avatar: this.selectedModel?.icon || '🤖',
-          content: '抱歉，出错了: ' + error.message
+          content: '抱歉，出错了: ' + error.message,
+          timestamp: Date.now()
         });
       } finally {
         this.previewImageUrl = null;
@@ -640,12 +823,11 @@ export default {
         this.scrollToBottom();
       }
     },
-    
 
   async startNewChat() {
     try {
       // 调用后端创建会话接口
-      const response = await axios.post('/chat/start', null, {
+      const response = await axios.post('http://localhost:8000/chat/start', null, {
         params: { user_id: this.userId } // 传递user_id作为Query参数
       });
       const { session_id: newSessionId, welcome_message: welcomeMsg } = response.data;
@@ -670,7 +852,7 @@ export default {
   // 新增：获取用户会话列表（用于前端显示历史会话）
   async fetchSessionList() {
     try {
-      const response = await axios.get('/chat/sessions', {
+      const response = await axios.get('http://localhost:8000/chat/sessions', {
         params: { user_id: this.userId }
       });
       this.sessionList = response.data.sessions; // 存储会话列表到前端状态
@@ -687,7 +869,7 @@ export default {
       
       if (confirm('确定要清除当前对话历史吗？')) {
         try {
-          await axios.delete(`/chat/history/${this.currentSessionId}`, {
+          await axios.delete(`http://localhost:8000/chat/history/${this.currentSessionId}`, {
             params: { user_id: this.userId }
           });
           
@@ -708,7 +890,7 @@ export default {
     // 加载会话历史
     async loadSession(sessionId) {
       try {
-        const response = await axios.get('/chat/history', {
+        const response = await axios.get('http://localhost:8000/chat/history', {
           params: {
             user_id: this.userId,
             session_id: sessionId
@@ -738,7 +920,7 @@ export default {
       
       if (confirm('确定要删除此会话吗？')) {
         try {
-          await axios.delete(`/chat/session/${sessionId}`, {
+          await axios.delete(`http://localhost:8000/chat/session/${sessionId}`, {
             params: { user_id: this.userId }
           });
           

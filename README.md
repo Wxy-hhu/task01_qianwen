@@ -220,28 +220,6 @@ MAX_HISTORY_MESSAGES=20
 3. 实现必要的方法
 4. 在 `factory.py` 中注册新提供商
 
-### 自定义AI角色
-在 `main.py` 中的 `AI_ROLES` 字典中添加新角色：
-
-```python
-AI_ROLES = {
-    "custom_role": {
-        "name": "自定义角色",
-        "icon": "🎭",
-        "prompt": "你的角色提示词"
-    }
-}
-```
-
-### 扩展功能
-- 修改 `static/index.html` 自定义前端界面
-- 添加新的API端点扩展功能
-- 修改配置文件支持更多选项
-
-## 📄 许可证
-
-本项目采用MIT许可证，详见LICENSE文件。
-
 ## 🔗 相关链接
 
 - [FastAPI官方文档](https://fastapi.tiangolo.com/)
