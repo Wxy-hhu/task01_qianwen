@@ -26,11 +26,6 @@ import redis
 from config import Config
 from ai_providers.factory import AIProviderFactory, MultiProviderManager
 
-# 1. 先配置API路由（如聊天接口、图片上传接口）
-# 注意：API路由需放在通配符路由之前，避免被拦截
-# from fastapi import APIRouter
-# api_router = APIRouter(prefix="/api")  # API路径统一前缀为 /api
-
 # 配置日志系统
 # 创建配置实例
 config = Config()
@@ -64,20 +59,6 @@ app = FastAPI(
 
 # 挂载静态文件目录
 # app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# # 注册API路由
-# app.include_router(api_router)
-
-# # 2. 挂载Vue静态资源（以方案1为例，挂载到根路径）
-# VUE_DIST_DIR = os.path.join(os.path.dirname(__file__), "vite_chatbot/dist")
-# app.mount("/", StaticFiles(directory=VUE_DIST_DIR, html=False), name="vue-static")
-
-
-# # 定义允许跨域的源（前端域名/端口）
-# origins = [
-#     "http://localhost:8080",  # 前端本地开发地址（必配）
-#     "http://127.0.0.1:8080",  # 本地IP地址（避免localhost解析问题）
-# ]
 
 #  全局添加CORS中间件
 app.add_middleware(
@@ -575,18 +556,6 @@ async def get_providers():
         logger.error(f"获取AI提供商列表失败: {e}")
         raise HTTPException(status_code=500, detail=f"获取提供商列表失败: {str(e)}")
     
-#     # 4. 通配符路由：所有非API、非静态资源的路径，都返回index.html（解决SPA刷新404）
-# # 注意：该路由需放在最后，避免拦截API和静态资源请求
-# @app.get("/{full_path:path}")
-# async def catch_all(full_path: str):
-#     # 排除API路径（避免/api/*请求被拦截）
-#     if full_path.startswith("api/"):
-#         return {"detail": "Not Found"}, 404
-    
-#     # 返回Vue的index.html，由前端路由处理
-#     index_path = os.path.join(VUE_DIST_DIR, "index.html")
-#     return FileResponse(index_path)
-
 
 @app.delete("/chat/session/{session_id}")
 async def delete_session(
