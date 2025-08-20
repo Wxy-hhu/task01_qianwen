@@ -83,7 +83,8 @@
         >
           <div class="message-avatar">{{ message.avatar }}</div>
           <div class="message-content-wrapper">
-            {{ message.content }}
+            <!-- {{ message.content }} -->
+            <MarkdownRenderer :content="message.content " />
             <img 
               v-if="message.imageUrl" 
               :src="message.imageUrl" 
@@ -165,9 +166,12 @@
 
 <script>
 import axios from 'axios';
-// import MarkdownRenderer from './components/MarkdownRenderer.vue';
+import MarkdownRenderer from './components/MarkdownRenderer.vue';
 
 export default {
+  components: {
+    MarkdownRenderer
+  },
   data() {
     return {
       // 从后端获取模型数据
@@ -486,8 +490,6 @@ export default {
                 const data = JSON.parse(line.substring(6)); // 移除 "data: " 前缀
                 if (data.content) {
                   aiResponseContent += data.content;
-
-                  //  <MarkdownRenderer />
                   
                   // 更新加载消息的内容
                   if (loadingMessageIndex !== -1) {
