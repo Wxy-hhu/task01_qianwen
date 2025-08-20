@@ -69,7 +69,7 @@ cd vite_chatbot
 npm run dev
 
 # Step 3：Web页面访问
-访问 http://localhost:8080
+访问 http://localhost:5173/
 ```
 
 
