@@ -115,30 +115,31 @@ export default {
   line-height: 1.6;
 }
 
+
 /* Markdown 内容样式 */
-.markdown-content ::v-deep h1,
-.markdown-content ::v-deep h2,
-.markdown-content ::v-deep h3,
-.markdown-content ::v-deep h4,
-.markdown-content ::v-deep h5,
-.markdown-content ::v-deep h6 {
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6) {
   margin: 1em 0 0.5em 0;
   font-weight: bold;
 }
 
-.markdown-content ::v-deep p {
+.markdown-content :deep(p) {
   margin: 0.5em 0;
 }
 
-.markdown-content ::v-deep code:not(.hljs) {
+.markdown-content :deep(code:not(.hljs)) {
   background-color: #f4f4f4;
   padding: 0.2em 0.4em;
   border-radius: 3px;
   font-family: 'Courier New', monospace;
-  color: #d63384;
+  color: #ed0520;
 }
 
-.markdown-content ::v-deep pre {
+.markdown-content :deep(pre) {
   background-color: #f8f9fa;
   padding: 1em;
   border-radius: 8px;
@@ -147,7 +148,7 @@ export default {
   border: 1px solid #e9ecef;
 }
 
-.markdown-content ::v-deep pre code {
+.markdown-content :deep(pre code) {
   background: none;
   padding: 0;
   color: inherit;
@@ -155,31 +156,31 @@ export default {
 }
 
 /* 代码高亮相关样式 */
-.markdown-content ::v-deep .hljs {
+.markdown-content :deep(.hljs) {
   font-family: 'Fira Code', 'Monaco', 'Consolas', 'Courier New', monospace;
   font-size: 0.9em;
   line-height: 1.5;
 }
 
-.markdown-content ::v-deep .hljs::-webkit-scrollbar {
+.markdown-content :deep(.hljs::-webkit-scrollbar) {
   height: 6px;
 }
 
-.markdown-content ::v-deep .hljs::-webkit-scrollbar-track {
+.markdown-content :deep(.hljs::-webkit-scrollbar-track) {
   background: #f1f1f1;
   border-radius: 3px;
 }
 
-.markdown-content ::v-deep .hljs::-webkit-scrollbar-thumb {
+.markdown-content :deep(.hljs::-webkit-scrollbar-thumb) {
   background: #c1c1c1;
   border-radius: 3px;
 }
 
-.markdown-content ::v-deep .hljs::-webkit-scrollbar-thumb:hover {
+.markdown-content :deep(.hljs::-webkit-scrollbar-thumb:hover) {
   background: #a8a8a8;
 }
 
-.markdown-content ::v-deep blockquote {
+.markdown-content :deep(blockquote) {
   border-left: 4px solid #ddd;
   margin: 1em 0;
   padding-left: 1em;
@@ -189,32 +190,33 @@ export default {
   border-radius: 4px;
 }
 
-.markdown-content ::v-deep ul,
-.markdown-content ::v-deep ol {
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
   margin: 0.5em 0;
   padding-left: 2em;
 }
 
-.markdown-content ::v-deep table {
+.markdown-content :deep(table) {
   border-collapse: collapse;
   width: 100%;
   margin: 1em 0;
   font-size: 0.9em;
 }
 
-.markdown-content ::v-deep th,
-.markdown-content ::v-deep td {
+.markdown-content :deep(th),
+.markdown-content :deep(td) {
   border: 1px solid #ddd;
   padding: 0.75em;
   text-align: left;
 }
 
-.markdown-content ::v-deep th {
+.markdown-content :deep(th) {
   background-color: #f5f5f5;
   font-weight: bold;
 }
 
-.markdown-content ::v-deep tr:nth-child(even) {
+.markdown-content :deep(tr:nth-child(even)) {
   background-color: #f9f9f9;
 }
+
 </style>
