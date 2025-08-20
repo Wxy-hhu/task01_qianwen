@@ -72,7 +72,7 @@
         <div class="message assistant">
                     <div class="message-avatar">🤖</div>
                     <div class="message-content-wrapper">
-                        👋 欢迎使用FastAPI AI聊天演示！请从左侧选择一个AI模型开始对话。
+                        👋 欢迎使用基于大模型的图片分析聊天演示！请选择一个AI模型开始对话。
                     </div>
         </div>
         <div 
@@ -163,206 +163,9 @@
   </div>
 </template>
 
-<!--
-<script>
-export default {
-  data() {
-    return {
-      // 模型列表数据
-      models: [
-        { id: 'gpt-3.5', name: 'Deepseek-chat', icon: '🤖' },
-        { id: 'gpt-4', name: 'Deepseek-reasoner', icon: '🧠' },
-        { id: 'claude', name: 'Qianwen-VL', icon: '✨' },
-      ],
-      // 当前选中的模型ID
-      selectedModelId: null,
-      // 下拉菜单是否展开
-      dropdownOpen: false,
-      // 对话消息列表
-      messages: [
-        {
-          isAssistant: true,
-          avatar: '🤖',
-          content: '👋 欢迎使用FastAPI AI聊天演示！请从左侧选择一个AI模型开始对话。'
-        }
-      ],
-      // 新消息内容
-      newMessage: '',
-      // 预览图片URL
-      previewImageUrl: null,
-      // 图片文件
-      imageFile: null
-    };
-  },
-  computed: {
-    // 当前选中的模型
-    selectedModel() {
-      return this.models.find(model => model.id === this.selectedModelId);
-    },
-    // 是否有消息
-    hasMessages() {
-      // 排除初始欢迎消息
-      return this.messages.length > 1;
-    },
-    // 是否可以发送消息
-    canSendMessage() {
-      // 必须选择模型，并且有消息内容或图片
-      return !!this.selectedModelId && (this.newMessage.trim() !== '' || this.previewImageUrl);
-    }
-  },
-  methods: {
-    // 选择模型
-    selectModel(modelId) {
-      this.selectedModelId = modelId;
-      this.dropdownOpen = false;
-    },
-    // 切换下拉菜单
-    toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen;
-    },
-    // 处理图片上传
-    handleImageUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.imageFile = file;
-        // 创建预览URL
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.previewImageUrl = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-      // 重置input，以便可以再次选择相同的文件
-      event.target.value = '';
-    },
-    // 移除图片
-    removeImage() {
-      this.previewImageUrl = null;
-      this.imageFile = null;
-    },
-    // 处理按键事件
-    handleKeyPress(event) {
-      // Enter键发送消息，Ctrl+Enter换行
-      if (event.key === 'Enter') {
-        if (event.ctrlKey) {
-          // 插入换行符
-          this.newMessage += '\n';
-        } else {
-          // 阻止默认行为（避免添加换行）并发送消息
-          event.preventDefault();
-          this.sendMessage();
-        }
-      }
-    },
-    // 发送消息
-    sendMessage() {
-      if (!this.canSendMessage) return;
-
-      // 添加用户消息
-      const userMessage = {
-        isAssistant: false,
-        avatar: '👤',
-        content: this.newMessage.trim()
-      };
-
-      // 如果有图片，添加图片URL
-      if (this.previewImageUrl) {
-        userMessage.imageUrl = this.previewImageUrl;
-        userMessage.imageAlt = '用户上传的图片';
-      }
-
-      this.messages.push(userMessage);
-
-      // 清空输入
-      this.newMessage = '';
-      this.previewImageUrl = null;
-      this.imageFile = null;
-
-      // 模拟AI回复
-      this.getAiResponse();
-    },
-    // 获取AI回复（模拟）
-    getAiResponse() {
-      // 模拟加载状态
-      const loadingMessage = {
-        isAssistant: true,
-        avatar: this.selectedModel?.icon || '🤖',
-        content: '正在思考...'
-      };
-      this.messages.push(loadingMessage);
-
-      // 模拟网络延迟
-      setTimeout(() => {
-        // 移除加载消息
-        this.messages.pop();
-
-        // 添加AI回复
-        const aiResponses = [
-          '感谢您的提问！我正在努力理解您的需求...',
-          '这是一个很好的问题。根据我的分析...',
-          '我理解您的意思了。以下是我的看法...',
-          '让我思考一下... 我认为可以这样解决...'
-        ];
-        
-        const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-        
-        this.messages.push({
-          isAssistant: true,
-          avatar: this.selectedModel?.icon || '🤖',
-          content: randomResponse
-        });
-
-        // 滚动到底部
-        this.scrollToBottom();
-      }, 1500);
-    },
-    // 新建对话
-    startNewChat() {
-      this.messages = [
-        {
-          isAssistant: true,
-          avatar: this.selectedModel?.icon || '🤖',
-          content: `👋 已开始新对话！我是${this.selectedModel?.name || 'AI助手'}，有什么可以帮助您的吗？`
-        }
-      ];
-    },
-    // 清除历史
-    clearHistory() {
-      if (confirm('确定要清除所有对话历史吗？')) {
-        this.startNewChat();
-      }
-    },
-    // 滚动到最新消息
-    scrollToBottom() {
-      this.$nextTick(() => {
-        const chatMessages = document.getElementById('chatMessages');
-        if (chatMessages) {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-      });
-    }
-  },
-  watch: {
-    // 当消息列表变化时滚动到底部
-    messages() {
-      this.scrollToBottom();
-    }
-  },
-  mounted() {
-    // 点击外部关闭下拉菜单
-    document.addEventListener('click', (event) => {
-      const dropdown = document.querySelector('.custom-select-wrapper');
-      if (!dropdown.contains(event.target)) {
-        this.dropdownOpen = false;
-      }
-    });
-  }
-};
-</script>
--->
-
 <script>
 import axios from 'axios';
+// import MarkdownRenderer from './components/MarkdownRenderer.vue';
 
 export default {
   data() {
@@ -576,107 +379,7 @@ export default {
       }
     },
     
-    // // 发送消息
-    // async sendMessage() {
-    //   if (!this.canSendMessage) return;
-      
-    //   // 如果是新会话，先创建会话
-    //   if (!this.currentSessionId) {
-    //     try {
-    //       const response = await axios.post('http://localhost:8000/chat/start', null, {
-    //         params: { user_id: this.userId }
-    //       });
-    //       this.currentSessionId = response.data.session_id;
-    //       // 添加欢迎消息
-    //       this.messages = [{
-    //         isAssistant: true,
-    //         avatar: this.selectedModel?.icon || '🤖',
-    //         content: response.data.welcome_message
-    //       }];
-    //     } catch (error) {
-    //       console.error('创建会话失败:', error);
-    //       return;
-    //     }
-    //   }
-      
-    //   // 添加用户消息
-    //   const userMessage = {
-    //     isAssistant: false,
-    //     avatar: '👤',
-    //     content: this.newMessage.trim(),
-    //     timestamp: Date.now()
-    //   };
-      
-    //   // 如果有图片，添加图片URL
-    //   if (this.previewImageUrl) {
-    //     userMessage.imageUrl = this.previewImageUrl;
-    //     userMessage.imageAlt = '用户上传的图片';
-    //   }
-      
-    //   this.messages.push(userMessage);
-      
-    //   // 清空输入
-    //   this.newMessage = '';
-    //   const imageInput = document.getElementById('imageUpload');
-    //   if (imageInput) imageInput.value = '';
-      
-    //   // 添加加载指示器
-    //   const loadingMessage = {
-    //     isAssistant: true,
-    //     avatar: this.selectedModel?.icon || '🤖',
-    //     content: '正在思考...',
-    //     isLoading: true
-    //   };
-    //   this.messages.push(loadingMessage);
-    //   this.scrollToBottom();
-      
-    //   // 准备请求数据
-    //   const requestData = {
-    //     user_id: this.userId,
-    //     session_id: this.currentSessionId,
-    //     message: userMessage.content,
-    //     role: this.selectedModelId,
-    //     provider: this.selectedModel?.provider || 'default'
-    //   };
-      
-    //   // 如果有图片
-    //   if (this.imageFile) {
-    //     requestData.image_data = this.previewImageUrl.split(',')[1];
-    //     requestData.image_type = this.previewImageUrl.split(';')[0].split(':')[1];
-    //   }
-      
-    //   // 发送消息到后端
-    //   try {
-    //     const response = await axios.fetch('http://localhost:8000/chat/stream', requestData);
-        
-    //     // 移除加载消息
-    //     this.messages = this.messages.filter(msg => !msg.isLoading);
-        
-    //     // 添加AI回复
-    //     const aiResponse = {
-    //       isAssistant: true,
-    //       avatar: this.selectedModel?.icon || '🤖',
-    //       content: response.data, // 假设返回的是完整文本
-    //       timestamp: Date.now()
-    //     };
-        
-    //     this.messages.push(aiResponse);
-    //     this.fetchSessions(); // 刷新会话列表
-    //   } catch (error) {
-    //     console.error('发送消息失败:', error);
-    //     // 移除加载消息并显示错误
-    //     this.messages = this.messages.filter(msg => !msg.isLoading);
-    //     this.messages.push({
-    //       isAssistant: true,
-    //       avatar: this.selectedModel?.icon || '🤖',
-    //       content: '抱歉，出错了: ' + error.message
-    //     });
-    //   } finally {
-    //     this.previewImageUrl = null;
-    //     this.imageFile = null;
-    //     this.scrollToBottom();
-    //   }
-    // },
+    
     async sendMessage() {
       if (!this.canSendMessage) return;
       
@@ -783,6 +486,8 @@ export default {
                 const data = JSON.parse(line.substring(6)); // 移除 "data: " 前缀
                 if (data.content) {
                   aiResponseContent += data.content;
+
+                  //  <MarkdownRenderer />
                   
                   // 更新加载消息的内容
                   if (loadingMessageIndex !== -1) {
@@ -959,7 +664,11 @@ export default {
     }
   }
 };
+
+
+
 </script>
+
 
 
 

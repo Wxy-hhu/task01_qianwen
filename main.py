@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-FastAPI AI聊天应用演示项目
-实现连续多轮对话功能
+基于开源大模型的图片分析聊天应用
+实现图片分析、连续多轮对话等功能
 """
 
 import json
