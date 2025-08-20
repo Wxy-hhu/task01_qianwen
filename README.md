@@ -1,16 +1,15 @@
 <<<<<<< HEAD
-# FastAPI AI聊天应用演示项目
+# 基于开源大模型的图片分析聊天应用
 
-一个基于FastAPI和多AI提供商的智能聊天应用，支持连续多轮对话、流式响应、图片理解等功能。
+一个基于FastAPI和VUE的智能聊天应用，支持图片上传分析、连续多轮对话、流式输出等功能。
 
 ## 🌟 主要特性
 
 ### 核心功能
+- **图片分析**: 支持图片上传和Qianwen大模型分析功能
 - **多轮对话**: 支持连续的上下文对话，保持对话历史
-- **流式响应**: 实时流式输出，提供更好的用户体验
+- **流式输出**: 实时流式输出，提供更好的用户体验
 - **会话管理**: 完整的会话创建、查看、删除功能
-- **图片理解**: 支持图片上传和AI视觉理解功能
-- **多角色支持**: 内置智能助手、AI老师、编程专家等角色
 
 ### AI提供商支持
 - **DeepSeek**: DeepSeek系列模型
@@ -30,11 +29,6 @@
 - Python 3.8+
 - Redis (可选，不配置时使用内存存储)
 
-### 安装依赖
-```bash
-pip install -r requirements.txt
-```
-
 ### 配置环境变量
 复制环境变量模板：
 ```bash
@@ -49,12 +43,6 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 
 # DeepSeek配置
 DEEPSEEK_API_KEY=your_deepseek_api_key
-
-# 豆包配置
-DOUBAO_API_KEY=your_doubao_api_key
-
-# Kimi配置
-KIMI_API_KEY=your_kimi_api_key
 
 # 通义千问配置
 QIANWEN_API_KEY=your_qianwen_api_key
@@ -73,17 +61,17 @@ LOG_LEVEL=INFO
 
 ### 启动应用
 ```bash
-# 方式1：直接启动
-python main.py
-
-# 方式2：使用启动脚本
+# Step 1：开启后端服务
 python start_server.py
 
-# 方式3：使用uvicorn
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+# Step 2：开启前端服务
+cd vite_chatbot
+npm run dev
+
+# Step 3：Web页面访问
+访问 http://localhost:8080
 ```
 
-访问 http://localhost:8000 开始使用聊天应用。
 
 ## 📁 项目结构
 
@@ -95,20 +83,12 @@ fastapi-ai-chat-demo/
 ├── requirements.txt       # 依赖包列表
 ├── .env.example          # 环境变量模板
 ├── ai_providers/         # AI提供商模块
-│   ├── __init__.py
-│   ├── base.py          # 基础类定义
-│   ├── factory.py       # 提供商工厂
-│   ├── openai_provider.py
-│   ├── deepseek_provider.py
-│   ├── doubao_provider.py
-│   ├── kimi_provider.py
-│   ├── qianwen_provider.py
-│   └── openai_compatible_provider.py
-├── static/              # 静态文件
-│   ├── index.html      # 聊天界面
-│   ├── css/
-│   └── js/
-├── docs/               # 项目文档
+├── vite_chatbot/         # vue文件
+│   ├── node_modules
+│   ├── public
+│   └── src      # 聊天界面
+│         ├── style.css/
+│         └── App.vue/
 └── logs/              # 日志文件目录
 ```
 
@@ -123,7 +103,6 @@ fastapi-ai-chat-demo/
 - `DELETE /chat/history/{session_id}` - 清除对话历史
 
 ### 配置相关
-- `GET /roles` - 获取可用的AI角色列表
 - `GET /providers` - 获取可用的AI提供商列表
 
 ### 文件上传
@@ -132,8 +111,6 @@ fastapi-ai-chat-demo/
 ### 其他
 - `GET /` - 重定向到聊天界面
 - `GET /api` - API信息
-
-详细的API文档可访问：http://localhost:8000/docs
 
 ## 🎯 使用说明
 
@@ -149,9 +126,10 @@ fastapi-ai-chat-demo/
 - 每个提供商支持多个模型选择
 
 ### 图片理解
+1. 选择Qianwen大模型
 1. 点击图片上传按钮
 2. 选择图片文件（支持jpg、png等格式）
-3. 发送消息，AI将分析图片内容
+3. 发送消息，Qianwen大模型将分析图片内容
 
 ### 会话管理
 - 查看历史会话列表
@@ -162,16 +140,6 @@ fastapi-ai-chat-demo/
 
 ### AI提供商配置
 每个AI提供商都需要相应的API密钥，在 `.env` 文件中配置：
-
-```env
-# 设置默认提供商
-DEFAULT_AI_PROVIDER=openai
-
-# 各提供商的API密钥
-OPENAI_API_KEY=your_key_here
-DEEPSEEK_API_KEY=your_key_here
-# ... 其他提供商
-```
 
 ### Redis配置
 Redis用于持久化存储对话历史，如果不配置Redis，应用会自动使用内存存储：
@@ -212,14 +180,6 @@ MAX_HISTORY_MESSAGES=20
 - 错误和异常信息
 - 会话管理操作
 
-## 🛠️ 开发指南
-
-### 添加新的AI提供商
-1. 在 `ai_providers/` 目录下创建新的提供商文件
-2. 继承 `BaseAIProvider` 类
-3. 实现必要的方法
-4. 在 `factory.py` 中注册新提供商
-
 ## 🔗 相关链接
 
 - [FastAPI官方文档](https://fastapi.tiangolo.com/)
@@ -227,8 +187,6 @@ MAX_HISTORY_MESSAGES=20
 - [Redis官方文档](https://redis.io/documentation)
 
 ---
-
-如果你觉得这个项目有用，请给它一个⭐️！
 =======
 # task01_qianwen
 fastapi,python,qianwen
