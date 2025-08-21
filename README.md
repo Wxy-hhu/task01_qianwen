@@ -61,6 +61,10 @@ LOG_LEVEL=INFO
 
 ### 启动应用
 ```bash
+# Step 0:开启Redisfuwu
+终端打开文件夹D:\ProgramData\Redis-x64-5.0.14.1
+.\redis-server.exe .\redis.windows.conf
+
 # Step 1：开启后端服务
 python start_server.py
 
