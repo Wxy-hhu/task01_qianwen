@@ -76,7 +76,7 @@ npm run dev
 ## 📁 项目结构
 
 ```
-fastapi-ai-chat-demo/
+task01_qianwen/
 ├── main.py                 # 主应用文件
 ├── config.py              # 配置管理
 ├── start_server.py        # 启动脚本
