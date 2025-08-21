@@ -92,21 +92,30 @@
                 :assistant-type="currentAssistantType"
                 :thinking-messages="thinkingMessages"
               />
+              <!-- <MarkdownRenderer :content="message.content " /> -->
 
-              <!-- 消息内容渲染 -->
+              <!-- 消息内容渲染
               <MarkdownRenderer 
                 v-if="!message.isThinking || !message.isAssistant"
                 :content="message.content" 
-              />
-              <!-- <MarkdownRenderer :content="message.content " /> -->
+              />            
 
               <img 
                 v-if="message.imageUrl" 
                 :src="message.imageUrl" 
                 class="message-image"
                 :alt="message.imageAlt || '用户上传的图片'"
-              >
+              > -->
+
+              <!-- 文字+图片统一通过Markdown渲染 -->
+              <MarkdownRenderer 
+                v-if="!message.isThinking || !message.isAssistant"
+                :content="formatMessageWithImage(message)"  
+              />
+
+
             </div>
+            
           </div>
 
 
@@ -166,8 +175,11 @@
             >
             <button class="remove-image" @click="removeImage">×</button>
           </div>
-          <div class="enter-tip">Enter 发送</div>
+          <!-- <div class="enter-tip">Enter 发送</div> -->
           <div class="send-section">
+            <span class="enter-tip">Enter 发送</span>
+              <!-- 占位元素，用于推动按钮到最右侧 -->
+            <div class="spacer"></div>
             <button 
               class="send-button" 
               id="sendButton" 
@@ -267,7 +279,6 @@ export default {
     },
     
    
-
     async fetchModels() {
       try {
         // const response = await axios.get('http://localhost:8000/providers'); // 修改为调用 /providers 接口
@@ -417,7 +428,17 @@ export default {
       }
     },
     
-    
+    formatMessageWithImage(message) {
+      // 1. 基础文字内容（若没有则为空字符串）
+      let content = message.content || "";
+      // 2. 若存在图片URL，拼接Markdown图片语法（可根据需求调整图片位置，如文字前/后）
+      if (message.imageUrl) {
+        const imageAlt = message.imageAlt || "消息图片"; // 默认alt文本
+        const markdownImage = `\n\n![${imageAlt}](${message.imageUrl})`; // 换行后插入图片
+        content += markdownImage;
+      }
+      return content;
+    },
     
     async sendMessage() {
       if (!this.canSendMessage) return;

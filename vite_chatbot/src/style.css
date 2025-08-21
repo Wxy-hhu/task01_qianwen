@@ -371,7 +371,7 @@ body {
 
 .preview-img {
   max-width: 100%;
-  max-height: 100px;
+  max-height: 150px;
   border-radius: 4px;
 }
 
@@ -398,9 +398,15 @@ body {
   margin-left: 12px;
 }
 
+.spacer {
+  flex-grow: 1;           /* 占据所有剩余空间，将按钮推到最右侧 */
+}
+
 .send-section {
   display: flex;
-  justify-content: flex-end;
+  align-items: center; /* 子元素垂直居中（避免提示文本和按钮高低不一） */
+  gap: 8px; /* 提示文本和按钮之间的间距，可根据需求调整（如10px） */
+  /* justify-content: flex-end; */
 }
 
 .send-button {

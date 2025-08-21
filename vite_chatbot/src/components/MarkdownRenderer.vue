@@ -107,12 +107,26 @@ export default {
 
 <style scoped>
 .markdown-container {
-  max-height: 400px;
-  overflow-y: auto;
+  margin: 10px 0; /* 上下各留10px间距，与其他元素区分开 */
+  padding: 0 8px; /* 左右各留8px内边距，避免内容贴容器边缘 */
+  /* max-height: 400px;
+  overflow-y: auto; */
 }
 
 .markdown-content {
   line-height: 1.6;
+}
+
+.markdown-content :deep(img) {
+    /* 1. 统一固定宽度（所有图片都用这个宽度） */
+  width: 300px; 
+  /* 2. 高度自动计算（按原图比例适配宽度，避免变形） */
+  height: auto; 
+  /* 3. 辅助样式：水平居中+间距+美化 */
+  display: block;        /* 块级元素才能水平居中 */
+  margin: 16px auto;     /* 上下间距16px，左右自动（居中） */
+  max-width: 100%;       /* 兼容小屏幕：宽度不超过父容器（防止溢出） */
+  border-radius: 8px;    /* 圆角（可选，美化） */
 }
 
 
