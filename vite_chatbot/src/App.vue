@@ -75,24 +75,43 @@
                         👋 欢迎使用基于大模型的图片分析聊天演示！请选择一个AI模型开始对话。
                     </div>
         </div>
-        <div 
-          v-for="(message, index) in messages" 
-          :key="index" 
-          class="message"
-          :class="{ 'assistant': message.isAssistant, 'user': !message.isAssistant }"
-        >
-          <div class="message-avatar">{{ message.avatar }}</div>
-          <div class="message-content-wrapper">
-            <!-- {{ message.content }} -->
-            <MarkdownRenderer :content="message.content " />
-            <img 
-              v-if="message.imageUrl" 
-              :src="message.imageUrl" 
-              class="message-image"
-              :alt="message.imageAlt || '用户上传的图片'"
-            >
+
+          <div 
+            v-for="(message, index) in messages" 
+            :key="index" 
+            class="message"
+            :class="{ 'assistant': message.isAssistant, 'user': !message.isAssistant }"
+          >
+            <div class="message-avatar">{{ message.avatar }}</div>
+            <div class="message-content-wrapper">
+              <!-- {{ message.content }} -->
+              <!-- AI思考指示器，仅在AI消息且处于思考状态时显示 -->
+              <AiThinkingIndicator
+                v-if="message.isAssistant && message.isThinking"
+                ref="thinkingIndicator"
+                :assistant-type="currentAssistantType"
+                :thinking-messages="thinkingMessages"
+              />
+
+              <!-- 消息内容渲染 -->
+              <MarkdownRenderer 
+                v-if="!message.isThinking || !message.isAssistant"
+                :content="message.content" 
+              />
+              <!-- <MarkdownRenderer :content="message.content " /> -->
+
+              <img 
+                v-if="message.imageUrl" 
+                :src="message.imageUrl" 
+                class="message-image"
+                :alt="message.imageAlt || '用户上传的图片'"
+              >
+            </div>
           </div>
-        </div>
+
+
+
+
       </div>
 
       <div class="chat-input">
@@ -167,10 +186,12 @@
 <script>
 import axios from 'axios';
 import MarkdownRenderer from './components/MarkdownRenderer.vue';
+import AiThinkingIndicator from './components/AiThinkingIndicator.vue';
 
 export default {
   components: {
-    MarkdownRenderer
+    MarkdownRenderer,
+    AiThinkingIndicator  // 新增的组件
   },
   data() {
     return {
@@ -180,10 +201,23 @@ export default {
       selectedModelId: null,
       // 下拉菜单是否展开
       dropdownOpen: false,
-      // 对话消息列表
-      messages: [],
-      // 新消息内容
+      // // 对话消息列表
+      // messages: [],
+      // // 新消息内容
+      // newMessage: '',
+      messages: [
+        //   isThinking: false,
+        //   imageUrl: null,
+        //   imageAlt: null
+        // }
+      ],
       newMessage: '',
+      currentAssistantType: 'default',
+      thinkingMessages: [
+        '正在思考...',
+        '整理思路中...',
+        '请稍候...'
+      ],
       // 预览图片URL
       previewImageUrl: null,
       // 图片文件
@@ -384,6 +418,7 @@ export default {
     },
     
     
+    
     async sendMessage() {
       if (!this.canSendMessage) return;
       
@@ -424,14 +459,14 @@ export default {
       
       // 清空输入
       this.newMessage = '';
-
-      
+    
       // 添加加载指示器
       const loadingMessage = {
         isAssistant: true,
         avatar: this.selectedModel?.icon || '🤖',
         content: '',
         isLoading: true,
+        isThinking: true,  //新增AI思考过程
         messageId: Date.now() // 为消息添加唯一标识
       };
       this.messages.push(loadingMessage);
@@ -465,7 +500,7 @@ export default {
           body: JSON.stringify(requestData),
         });
         
-        if (!response.ok) {
+        if (!response.ok) {          
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
@@ -493,6 +528,7 @@ export default {
                   
                   // 更新加载消息的内容
                   if (loadingMessageIndex !== -1) {
+                    this.messages[loadingMessageIndex].isThinking = false; // 在这里关闭思考状态
                     this.messages[loadingMessageIndex].content = aiResponseContent;
                     this.scrollToBottom();
                   }
@@ -505,9 +541,9 @@ export default {
         }
         
         // 流结束后，移除加载状态
-        if (loadingMessageIndex !== -1) {
+        if (loadingMessageIndex !== -1) {       
           this.messages[loadingMessageIndex].isLoading = false;
-          this.messages[loadingMessageIndex].timestamp = Date.now();
+          this.messages[loadingMessageIndex].timestamp = Date.now();          
         }
         
         this.fetchSessions(); // 刷新会话列表
